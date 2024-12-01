@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Selected File",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${file}", // Runs the currently open file in the editor
+            "cwd": "${workspaceFolder}", // Set working directory to the workspace folder
+            "args": [], // Pass any additional arguments if needed
+            "env": {}, // Environment variables
+            "buildFlags": "" // Additional build flags
+        }
+    ]
+}
