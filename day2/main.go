@@ -34,19 +34,16 @@ func solution1(data [][]int) int {
 
 	for i := 0; i < len(data); i++ {
 		isNegative := (data[i][0] - data[i][1]) < 0
-		valid := true // Track if the row is valid
+		valid := true
 
 		for j := 0; j < len(data[i])-1; j++ {
 			diff := data[i][j] - data[i][j+1]
 
-			// Check each condition
 			if diff == 0 || math.Abs(float64(diff)) > 3 || (diff > 0 && isNegative) || (diff < 0 && !isNegative) {
-				valid = false // Mark row as invalid
+				valid = false
 				break
 			}
 		}
-
-		// Increment total only if the row is valid
 		if valid {
 			total++
 		}
@@ -58,9 +55,14 @@ func solution1(data [][]int) int {
 func solution2(data [][]int) int {
 	total := 0
 	for _, report := range data {
-		if checkCondition(report) && dropLevelCheck(report) {
+		if checkCondition(report) {
 			total++
+		} else {
+			if dropLevelCheck(report) {
+				total++
+			}
 		}
+
 	}
 	return total
 }
@@ -92,14 +94,14 @@ func checkCondition(inputList []int) bool {
 
 func dropLevelCheck(inputList []int) bool {
 	for i := 0; i < len(inputList); i++ {
-		newList := []int{}
-		for j, val := range inputList {
-			if j != i {
-				newList = append(newList, val)
+		newlist := []int{}
+		for j := 0; j < len(inputList); j++ {
+			if j == i {
+				continue
 			}
+			newlist = append([]int{inputList[j]}, newlist...)
 		}
-
-		if checkCondition(newList) {
+		if checkCondition(newlist) {
 			return true
 		}
 	}
@@ -129,10 +131,8 @@ func openFile(filePath string) [][]int {
 
 	scanner := bufio.NewScanner(file)
 
-	// two int lists
 	var array [][]int
 
-	// Read each line
 	for scanner.Scan() {
 		line := scanner.Text() // Get the current line as a string
 		parts := strings.Fields(line)
