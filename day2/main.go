@@ -12,19 +12,19 @@ import (
 
 func main() {
 
-	// data_example := readExample()
+	data_example := readExample()
 	data_input := readInput()
 
-	// answer := solution1(data_example)
-	// fmt.Println("Answer for example solution 1: ", answer)
+	answer := solution1(data_example)
+	fmt.Println("Answer for example solution 1: ", answer)
 
-	// answer := solution1(data_input)
-	// fmt.Println("Answer for input solution 1: ", answer)
+	answer = solution1(data_input)
+	fmt.Println("Answer for input solution 1: ", answer)
 
-	// answer = solution2(data_example)
-	// fmt.Println("Answer for example solution 2: ", answer)
+	answer = solution2(data_example)
+	fmt.Println("Answer for example solution 2: ", answer)
 
-	answer := solution2(data_input)
+	answer = solution2(data_input)
 	fmt.Println("Answer for input solution 2: ", answer)
 
 }
