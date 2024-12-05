@@ -10,19 +10,19 @@ import (
 
 func main() {
 	data_example_rules, data_example_update := readExample()
-	// data_input_rules, data_input_update := readInput()
+	data_input_rules, data_input_update := readInput()
 
-	// answer := solution1(data_example_rules, data_example_update)
-	// fmt.Println("Answer for example solution 1: ", answer)
+	answer := solution1(data_example_rules, data_example_update)
+	fmt.Println("Answer for example solution 1: ", answer)
 
-	// answer = solution1(data_input_rules, data_input_update)
-	// fmt.Println("Answer for input solution 1: ", answer)
+	answer = solution1(data_input_rules, data_input_update)
+	fmt.Println("Answer for input solution 1: ", answer)
 
-	answer := solution2(data_example_rules, data_example_update)
+	answer = solution2(data_example_rules, data_example_update)
 	fmt.Println("Answer for example solution 2: ", answer)
 
-	// answer = solution2(data_input)
-	// fmt.Println("Answer for input solution 2: ", answer)
+	answer = solution2(data_input_rules, data_input_update)
+	fmt.Println("Answer for input solution 2: ", answer)
 
 }
 
@@ -41,17 +41,11 @@ func solution2(rules [][]int, update [][]int) int {
 		}
 	}
 
-	fmt.Println(incorrelyOrdered)
-
 	for _, line := range incorrelyOrdered {
-		fmt.Println("b ", line)
-		line = orderLine(ruleMap, line, 0)
-		fmt.Println("a ", line)
+		line = orderLine(ruleMap, line)
 		total += line[len(line)/2]
 	}
-
 	return total
-
 }
 
 func solution1(rules [][]int, update [][]int) int {
@@ -65,42 +59,46 @@ func solution1(rules [][]int, update [][]int) int {
 	return total
 }
 
-func orderLine(ruleMap map[int]rule, line []int, index int) []int {
-	if index == len(line) {
-		return line
-	}
-	for i := index; i < len(line); i++ {
-		num := line[i]
-		rule := ruleMap[num]
-		fmt.Println("r ", rule)
-		// go over the line
-		// see if all the numbers before num are in rule.numsBefore
-
+func orderLine(orderMap map[int]rule, line []int) []int {
+	for i, num := range line {
+		afterNums := orderMap[num].numsBefore
+		beforeNums := orderMap[num].numsAfter
+		if len(afterNums) == 0 && len(beforeNums) == 0 {
+			continue
+		}
 		before := line[:i]
-		for _,  := range before {
-			ci := containsIndex(before, beforeNum) // doesnt work
-			if ci > -1 {
-				line[index], line[index-1] = line[index-1], line[index]
-				return orderLine(ruleMap, line, index+1)
+		after := line[i+1:]
+		var wrongSpot []int
+		for _, bn := range beforeNums {
+			for _, a := range after {
+				if bn == a {
+					wrongSpot = append(wrongSpot, bn)
+				}
 			}
 		}
 
-		// after := line[i+1:]
-		// for _, afterNum := range after {
-		// 	if contains(rule.numsAfter, afterNum) {
-		// 		line[index-1], line[index] = line[index], line[index-1]
-		// 		return orderLine(ruleMap, line, index+1)
-		// 	}
-		// }
-
+		if len(wrongSpot) > 0 {
+			var newAfter []int
+			for _, a := range after {
+				found := false
+				for _, ws := range wrongSpot {
+					if ws == a {
+						found = true
+						break
+					}
+				}
+				if !found {
+					newAfter = append(newAfter, a)
+				}
+			}
+			line = append(append(append(before, wrongSpot...), num), newAfter...)
+			return orderLine(orderMap, line)
+		}
 	}
 	return line
-
 }
 
 func isCorrectOrder(ruleMap map[int]rule, updateLine []int) int {
-
-	// fmt.Printf("Update line: %v\n", updateLine)
 	for i, num := range updateLine {
 		rule := ruleMap[num]
 
@@ -127,15 +125,12 @@ func makeRuleMap(rules [][]int) map[int]rule {
 	ruleMap := make(map[int]rule)
 
 	for _, r := range rules {
-		// Retrieve the rule for rule[0] (or create a new one if it doesn't exist)
 		rule0 := ruleMap[r[0]]
 		rule0.numsBefore = append(rule0.numsBefore, r[1])
-		ruleMap[r[0]] = rule0 // Reassign updated rule to the map
-
-		// Retrieve the rule for rule[1] (or create a new one if it doesn't exist)
+		ruleMap[r[0]] = rule0
 		rule1 := ruleMap[r[1]]
 		rule1.numsAfter = append(rule1.numsAfter, r[0])
-		ruleMap[r[1]] = rule1 // Reassign updated rule to the map
+		ruleMap[r[1]] = rule1
 	}
 
 	return ruleMap
@@ -148,15 +143,6 @@ func contains(list []int, beforeNum int) bool {
 		}
 	}
 	return false
-}
-
-func containsIndex(list []int, beforeNum int) int {
-	for index, num := range list {
-		if num == beforeNum {
-			return index
-		}
-	}
-	return -1
 }
 
 func openFile(filePath string) ([][]int, [][]int) {
