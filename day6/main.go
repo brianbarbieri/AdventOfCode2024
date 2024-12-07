@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 )
 
 func main() {
@@ -70,30 +71,36 @@ func solution2(data [][]string) int {
 	// fmt.Println(walkedPositions)
 
 	total := 0
+
+	var wg sync.WaitGroup // WaitGroup to synchronize goroutines
+	var mu sync.Mutex     // Mutex to protect the shared variable 'total'
+
+	// Launch goroutines
 	for i := 0; i < len(walkedPositions); i++ {
-		// fmt.Println(i)
+		wg.Add(1) // Increment the WaitGroup counter
 
-		copyMap := make([][]string, len(data)) // Outer slice
-		for i := range data {
-			copyMap[i] = make([]string, len(data[i])) // Inner slice for each row
-			copy(copyMap[i], data[i])                 // Copy each row
-		}
+		go func(i int) {
+			defer wg.Done() // Decrement the WaitGroup counter when done
 
-		total += determineCircle(copyMap, walkedPositions[i], x, y, i)
+			// Create a copy of the 2D slice
+			copyMap := make([][]string, len(data))
+			for j := range data {
+				copyMap[j] = make([]string, len(data[j]))
+				copy(copyMap[j], data[j])
+			}
+
+			// Call determineCircle
+			result := determineCircle(copyMap, walkedPositions[i], x, y, i)
+
+			// Safely update the shared 'total' variable
+			mu.Lock()
+			total += result
+			mu.Unlock()
+		}(i) // Pass 'i' to avoid closure capturing issues
 	}
 
-	// iterate over path and add object to current iteration
-
-	// log step to array one (a1)
-	// keep logging
-	// if current location is already in a1, stop adding to it, purge all elements before current location in a1 and start adding to a2
-	// if add now to second array
-	// if a1[index] != a2[index] reset arrays and add path again to a1
-
-	// if a1[0] == a2[0] and a1[1] == a2[1] than we go in circles
-
-	// a1 = 1,2,3,4,5
-	// a2 = 1,2
+	// Wait for all goroutines to complete
+	wg.Wait()
 
 	return total
 }
