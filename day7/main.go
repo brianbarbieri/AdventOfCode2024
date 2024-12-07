@@ -22,6 +22,12 @@ func main() {
 
 	answer = solution1(data_input)
 	fmt.Println("Answer for input solution 1: ", answer)
+
+	answer = solution2(data_example)
+	fmt.Println("Answer for example solution 2: ", answer)
+
+	answer = solution2(data_input)
+	fmt.Println("Answer for input solution 2: ", answer)
 }
 
 func solution1(data []Line) int {
@@ -33,6 +39,32 @@ func solution1(data []Line) int {
 			for _, answer := range answers {
 				newAnswers = append(newAnswers, answer+num)
 				newAnswers = append(newAnswers, answer*num)
+			}
+			answers = newAnswers
+		}
+
+		for _, answer := range answers {
+			if answer == line.answer {
+				total += answer
+				break
+			}
+		}
+	}
+	return total
+}
+
+func solution2(data []Line) int {
+	total := 0
+	for _, line := range data {
+		answers := []int{line.numbers[0]}
+		for _, num := range line.numbers[1:] {
+			newAnswers := []int{}
+			for _, answer := range answers {
+				newAnswers = append(newAnswers, answer+num)
+				newAnswers = append(newAnswers, answer*num)
+				strAns := strconv.Itoa(answer) + strconv.Itoa(num)
+				num, _ := strconv.Atoi(strAns)
+				newAnswers = append(newAnswers, num)
 			}
 			answers = newAnswers
 		}
