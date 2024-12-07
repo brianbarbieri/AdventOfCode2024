@@ -9,16 +9,22 @@ import (
 
 func main() {
 	example_map := readExample()
-	// input_map := readInput()
+	input_map := readInput()
 
-	// answer := solution1(example_map)
-	// fmt.Println("Answer for example solution 1: ", answer)
+	example_map2 := readExample()
+	input_map2 := readInput()
 
-	// answer = solution1(input_map)
-	// fmt.Println("Answer for input solution 1: ", answer)
+	answer := solution1(example_map)
+	fmt.Println("Answer for example solution 1: ", answer)
 
-	answer := solution2(example_map)
+	answer = solution1(input_map)
+	fmt.Println("Answer for input solution 1: ", answer)
+
+	answer = solution2(example_map2)
 	fmt.Println("Answer for example solution 2: ", answer)
+
+	answer = solution2(input_map2)
+	fmt.Println("Answer for input solution 2: ", answer)
 
 }
 
@@ -48,22 +54,32 @@ func solution2(data [][]string) int {
 
 	data, x, y = findStart(data, STARTCHAR, POSTIONCHAR)
 
-	// fmt.Println(x, y)
+	copyMap := make([][]string, len(data)) // Outer slice
+	for i := range data {
+		copyMap[i] = make([]string, len(data[i])) // Inner slice for each row
+		copy(copyMap[i], data[i])                 // Copy each row
+	}
 
-	data = walkMap(data, x, y)
+	copyMap = walkMap(copyMap, x, y)
 
 	// printMap(data)
 
 	// first get all locations of current path minus starting location
-	walkedPositions := getWalkedPositions(data, POSTIONCHAR, x, y)
+	walkedPositions := getWalkedPositions(copyMap, POSTIONCHAR, x, y)
 
 	// fmt.Println(walkedPositions)
 
 	total := 0
 	for i := 0; i < len(walkedPositions); i++ {
-		fmt.Println(i)
+		// fmt.Println(i)
 
-		total += determineCircle(data, walkedPositions[i], x, y)
+		copyMap := make([][]string, len(data)) // Outer slice
+		for i := range data {
+			copyMap[i] = make([]string, len(data[i])) // Inner slice for each row
+			copy(copyMap[i], data[i])                 // Copy each row
+		}
+
+		total += determineCircle(copyMap, walkedPositions[i], x, y, i)
 	}
 
 	// iterate over path and add object to current iteration
@@ -82,14 +98,21 @@ func solution2(data [][]string) int {
 	return total
 }
 
-func determineCircle(data [][]string, position []int, x, y int) int {
+func determineCircle(data [][]string, position []int, x, y, i int) int {
 	data[position[0]][position[1]] = "#"
 	walkedRecord := make([][]int, 0)
-	BLOCKCHAR, POSTIONCHAR := "#", "X"
+	BLOCKCHAR := "#"
 	secondRound := false
 	nextStep := []int{0, 0}
 
 	direction := "up"
+	count := 0
+
+	// postion to string
+
+	//convert []int to string in one line
+
+	// file, _ := os.Create(strconv.Itoa(i) + "_" + strconv.Itoa(position[0]) + "_" + strconv.Itoa(position[1]) + ".txt")
 	for {
 
 		switch direction {
@@ -104,6 +127,9 @@ func determineCircle(data [][]string, position []int, x, y int) int {
 		}
 		if isOutside(data, x, y) {
 			break
+		}
+		if count == 10000 {
+			return 1
 		}
 		if data[x][y] == BLOCKCHAR {
 			switch direction {
@@ -121,9 +147,20 @@ func determineCircle(data [][]string, position []int, x, y int) int {
 				direction = "down"
 			}
 		} else {
-			data[x][y] = POSTIONCHAR
+			switch direction {
+			case "up":
+				data[x][y] = "|"
+			case "down":
+				data[x][y] = "|"
+			case "left":
+				data[x][y] = "-"
+			case "right":
+				data[x][y] = "-"
+			}
+
 			if secondRound {
 				if nextStep[0] == x && nextStep[1] == y {
+					// file.Close()
 					return 1
 				} else {
 					secondRound = false
@@ -138,7 +175,18 @@ func determineCircle(data [][]string, position []int, x, y int) int {
 			}
 
 		}
+		// file.WriteString("count:" + strconv.Itoa(count) + "\n")
+		// for i := 0; i < len(data); i++ {
+		// 	for j := 0; j < len(data[i]); j++ {
+		// 		file.WriteString(data[i][j])
+		// 	}
+		// 	file.WriteString("\n")
+		// }
+		// file.WriteString("\n")
+
+		count++
 	}
+	// file.Close()
 
 	// walk map but record all positions by adding x and y as "x_Y" to array if x_y already in list
 	//walk once more and see if it matches next x_y in the list fi so we walk a circle
